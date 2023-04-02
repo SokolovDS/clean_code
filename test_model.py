@@ -61,7 +61,7 @@ def test_prefers_warehouse_batches_to_shipments():
     warehouse = Batch(reference=2, sku=sku, qty=2, eta=None)
     earliest = Batch(reference=3, sku=sku, qty=2, eta=date(2023, 1, 1))
 
-    order_line = OrderLine(order_id="1", sku=sku, qty=2)
+    order_line = OrderLine(orderid="1", sku=sku, qty=2)
 
     allocate(order_line, [
         latest, warehouse, earliest
@@ -78,7 +78,7 @@ def test_prefers_earlier_batches():
     medium = Batch(reference=2, sku=sku, qty=2, eta=date(2023, 2, 1))
     earliest = Batch(reference=3, sku=sku, qty=2, eta=date(2023, 1, 1))
 
-    order_line = OrderLine(order_id="1", sku=sku, qty=2)
+    order_line = OrderLine(orderid="1", sku=sku, qty=2)
 
     allocate(order_line, [
         latest, medium, earliest
@@ -93,7 +93,7 @@ def test_returns_allocated_batch_ref():
 
     shipment_batch = Batch(reference="shipment-batch-ref", sku=sku, qty=2, eta=date(2023, 3, 1))
     in_stock_batch = Batch(reference="in-stock-batch-ref", sku=sku, qty=2, eta=None)
-    order_line = OrderLine(order_id="1", sku=sku, qty=2)
+    order_line = OrderLine(orderid="1", sku=sku, qty=2)
 
     allocation = allocate(order_line, [in_stock_batch, shipment_batch])
 
