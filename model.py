@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set
 
 
 class OutOfStock(Exception):
     pass
 
 
-@dataclass(frozen=False)
+@dataclass(unsafe_hash=True)
 class OrderLine:
     orderid: str
     sku: str
@@ -20,22 +20,24 @@ class Batch:
         self.qty = qty
         self.eta = eta
 
-        self.allocated: List[OrderLine] = []
+        self._allocations: Set[OrderLine] = set()
 
     @property
     def available_qty(self):
-        return self.qty - sum(map(lambda x: x.qty, self.allocated))
+        return self.qty - sum(map(lambda x: x.qty, self._allocations))
 
     def allocate(self, order_line: OrderLine):
         if self.can_allocate(order_line):
-            self.allocated.append(order_line)
+            self._allocations.add(order_line)
 
     def can_allocate(self, order_line: OrderLine) -> bool:
-        return self.sku == order_line.sku and self.available_qty >= order_line.qty and order_line not in self.allocated
+        return self.sku == order_line.sku \
+            and self.available_qty >= order_line.qty \
+            and order_line not in self._allocations
 
     def deallocate(self, order_line: OrderLine):
-        if order_line in self.allocated:
-            self.allocated.remove(order_line)
+        if order_line in self._allocations:
+            self._allocations.remove(order_line)
 
     def __eq__(self, other):
         if not isinstance(other, Batch):
