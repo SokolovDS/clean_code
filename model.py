@@ -17,14 +17,14 @@ class Batch:
     def __init__(self, reference, sku, qty, eta):
         self.reference = reference
         self.sku = sku
-        self.qty = qty
+        self._purchased_quantity = qty
         self.eta = eta
 
         self._allocations: Set[OrderLine] = set()
 
     @property
     def available_qty(self):
-        return self.qty - sum(map(lambda x: x.qty, self._allocations))
+        return self._purchased_quantity - sum(map(lambda x: x._purchased_quantity, self._allocations))
 
     def allocate(self, order_line: OrderLine):
         if self.can_allocate(order_line):
