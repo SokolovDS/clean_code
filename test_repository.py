@@ -23,6 +23,8 @@ def insert_order_line(session):
         dict(orderid="order1", sku="GENERIC-SOFA")
     )
     return orderline_id
+
+
 def insert_batch(session, reference) -> int:
     session.execute(text(
         'INSERT INTO batches (reference, sku, _purchased_quantity, eta)'
@@ -34,6 +36,7 @@ def insert_batch(session, reference) -> int:
         dict(reference=reference)
     )
     return batch_id
+
 
 def insert_allocation(session, orderline_id, batch_id) -> int:
     session.execute(text(
@@ -47,10 +50,11 @@ def insert_allocation(session, orderline_id, batch_id) -> int:
     )
     return allocation_id
 
+
 def test_repository_can_retrieve_a_batch_with_allocations(session):
     orderline_id = insert_order_line(session)
     batch1_id = insert_batch(session, "batch1")
-    insert_batch(session, "batch2")
+    batch2_id = insert_batch(session, "batch2")
     insert_allocation(session, orderline_id, batch1_id)
 
     repo = repository.SqlAlchemyRepository(session)

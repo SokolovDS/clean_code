@@ -24,7 +24,7 @@ class Batch:
 
     @property
     def available_qty(self):
-        return self._purchased_quantity - sum(map(lambda x: x._purchased_quantity, self._allocations))
+        return self._purchased_quantity - sum(map(lambda x: x.qty, self._allocations))
 
     def allocate(self, order_line: OrderLine):
         if self.can_allocate(order_line):
