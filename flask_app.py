@@ -6,6 +6,7 @@ import config
 import db_tables
 import model
 import repository
+import services
 
 db_tables.start_mappers()
 get_session = sessionmaker(bind=create_engine(config.get_postgres_uri()))
@@ -17,15 +18,20 @@ def hello_world():
     return "Hello, World!", 200
 
 
-@app.route("/allocate", methods=['GET', 'POST'])
+@app.route("/allocate", methods=['POST'])
 def allocate_endpoint():
     session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+
     line = model.OrderLine(
         request.json['orderid'],
         request.json['sku'],
         request.json['qty'],
     )
-    batches = repository.SqlAlchemyRepository(session).list()
-    batchref = model.allocate(line, batches)
-    session.commit()
+
+    try:
+        batchref = services.allocate(line, repo, session)
+    except (model.OutOfStock, services.InvalidSku) as e:
+        return jsonify({'message': str(e)}), 400
+
     return jsonify({'batchref': batchref}), 201
