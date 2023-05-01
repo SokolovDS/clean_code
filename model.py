@@ -5,6 +5,9 @@ from typing import List, Set
 class OutOfStock(Exception):
     pass
 
+class NotAllocated(Exception):
+    pass
+
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
@@ -62,4 +65,14 @@ def allocate(order_line: OrderLine, batches: List[Batch]) -> str:
         raise OutOfStock(f'Артикула {order_line.sku} нет в наличии') from e
 
     batch.allocate(order_line)
+    return batch.reference
+
+
+def deallocate(order_line: OrderLine, batches: List[Batch]) -> str:
+    try:
+        batch = next(b for b in sorted(batches) if order_line in b._allocations)
+    except StopIteration as e:
+        raise NotAllocated(f'Заказ {order_line.sku} не размещён ни в одной партии') from e
+
+    batch.deallocate(order_line)
     return batch.reference

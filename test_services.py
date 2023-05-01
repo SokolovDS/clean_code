@@ -36,3 +36,12 @@ def test_commits():
     session = FakeSession()
     services.allocate(line, repo, session)
     assert session.committed is True
+
+
+def test_returns_deallocation():
+    line = model.OrderLine("o1", "COMPLICATED-LAMP", 10)
+    batch = model.Batch("b1", "COMPLICATED-LAMP", 100, eta=None)
+    repo = FakeRepository([batch])
+    services.allocate(line, repo, FakeSession())
+    result = services.deallocate(line, repo, FakeSession())
+    assert result == "b1"

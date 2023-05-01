@@ -35,3 +35,22 @@ def allocate_endpoint():
         return jsonify({'message': str(e)}), 400
 
     return jsonify({'batchref': batchref}), 201
+
+
+@app.route("/deallocate", methods=['POST'])
+def deallocate_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+
+    line = model.OrderLine(
+        request.json['orderid'],
+        request.json['sku'],
+        request.json['qty'],
+    )
+
+    try:
+        batchref = services.deallocate(line, repo, session)
+    except model.NotAllocated as e:
+        return jsonify({'message': str(e)}), 400
+
+    return jsonify({'batchref': batchref}), 201
