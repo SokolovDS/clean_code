@@ -1,7 +1,6 @@
 import pytest
 
-import model
-import services
+from domain import model
 
 
 def test_success_deallocate():

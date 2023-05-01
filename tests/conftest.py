@@ -10,7 +10,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, clear_mappers
 
 import config
-from db_tables import metadata, start_mappers
+from adapters.orm import metadata, start_mappers
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def in_memory_db():
 @pytest.fixture
 def session(in_memory_db):
     start_mappers()
-    yield sessionmaker(bind=postgres_db)()
+    yield sessionmaker(bind=in_memory_db)()
     clear_mappers()
 
 

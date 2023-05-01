@@ -1,6 +1,6 @@
-import model
-from model import OrderLine
-from repository import AbstractRepository
+from domain import model
+from domain.model import OrderLine
+from adapters.repository import AbstractRepository
 
 
 class InvalidSku(Exception):

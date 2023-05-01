@@ -1,4 +1,4 @@
-from model import Batch, OrderLine
+from domain.model import Batch, OrderLine
 
 
 def make_batch_and_line(sku, batch_qty, line_qty) -> (Batch, OrderLine):
