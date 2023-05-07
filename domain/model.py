@@ -8,13 +8,28 @@ class OutOfStock(Exception):
     pass
 
 
-def allocate(line: OrderLine, batches: List[Batch]) -> str:
+def allocate(order_line: OrderLine, batches: List[Batch]) -> str:
     try:
-        batch = next(b for b in sorted(batches) if b.can_allocate(line))
-        batch.allocate(line)
-        return batch.reference
-    except StopIteration:
-        raise OutOfStock(f"Out of stock for sku {line.sku}")
+        batch = next(b for b in sorted(batches) if b.can_allocate(order_line))
+    except StopIteration as e:
+        raise OutOfStock(f'Артикула {order_line.sku} нет в наличии') from e
+
+    batch.allocate(order_line)
+    return batch.reference
+
+
+class NotAllocated(Exception):
+    pass
+
+
+def deallocate(order_line: OrderLine, batches: List[Batch]) -> str:
+    try:
+        batch = next(b for b in sorted(batches) if order_line in b._allocations)
+    except StopIteration as e:
+        raise NotAllocated(f'Заказ {order_line.sku} не размещён ни в одной партии') from e
+
+    batch.deallocate(order_line)
+    return batch.reference
 
 
 @dataclass(unsafe_hash=True)
@@ -29,8 +44,9 @@ class Batch:
         self.reference = ref
         self.sku = sku
         self.eta = eta
+
         self._purchased_quantity = qty
-        self._allocations = set()  # type: Set[OrderLine]
+        self._allocations: Set[OrderLine] = set()
 
     def __repr__(self):
         return f"<Batch {self.reference}>"
@@ -50,13 +66,13 @@ class Batch:
             return True
         return self.eta > other.eta
 
-    def allocate(self, line: OrderLine):
-        if self.can_allocate(line):
-            self._allocations.add(line)
+    def allocate(self, order_line: OrderLine):
+        if self.can_allocate(order_line):
+            self._allocations.add(order_line)
 
-    def deallocate(self, line: OrderLine):
-        if line in self._allocations:
-            self._allocations.remove(line)
+    def deallocate(self, order_line: OrderLine):
+        if order_line in self._allocations:
+            self._allocations.remove(order_line)
 
     @property
     def allocated_quantity(self) -> int:
@@ -66,5 +82,7 @@ class Batch:
     def available_quantity(self) -> int:
         return self._purchased_quantity - self.allocated_quantity
 
-    def can_allocate(self, line: OrderLine) -> bool:
-        return self.sku == line.sku and self.available_quantity >= line.qty
+    def can_allocate(self, order_line: OrderLine) -> bool:
+        return self.sku == order_line.sku \
+            and self.available_quantity >= order_line.qty \
+            and order_line not in self._allocations
