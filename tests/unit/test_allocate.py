@@ -37,9 +37,9 @@ def test_prefers_earlier_batches():
     allocate(order_line, [
         latest, medium, earliest
     ])
-    assert latest.available_qty == 2
-    assert medium.available_qty == 2
-    assert earliest.available_qty == 0
+    assert latest.available_quantity == 2
+    assert medium.available_quantity == 2
+    assert earliest.available_quantity == 0
 
 
 def test_returns_allocated_batch_ref():

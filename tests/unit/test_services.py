@@ -2,7 +2,7 @@ import pytest
 
 from adapters.repository import FakeRepository
 from adapters.session import FakeSession
-from service import services
+from service_layer import services
 
 
 def test_add_batch():
