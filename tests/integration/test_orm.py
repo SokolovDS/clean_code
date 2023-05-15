@@ -1,5 +1,5 @@
+from allocation.domain import model
 from datetime import date
-from domain import model
 from sqlalchemy.sql import text
 
 
