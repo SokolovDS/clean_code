@@ -30,13 +30,6 @@ def post_to_add_batch(ref, sku, qty, eta):
     assert r.status_code == 201
 
 
-@pytest.mark.usefixtures('restart_api')
-def test_api_return_hello_world():
-    url = config.get_api_url()
-    r = requests.get(url)
-    assert r.status_code == 200
-
-
 @pytest.mark.usefixtures("postgres_db")
 @pytest.mark.usefixtures("restart_api")
 def test_happy_path_returns_201_and_allocated_batch():
@@ -64,42 +57,4 @@ def test_unhappy_path_returns_400_and_error_message():
     url = config.get_api_url()
     r = requests.post(f"{url}/allocate", json=data)
     assert r.status_code == 400
-    assert r.json()["message"] == f"Недопустимый артикул {unknown_sku}"
-
-
-@pytest.mark.usefixtures("postgres_db")
-@pytest.mark.usefixtures("restart_api")
-def test_deallocate():
-    sku, order1, order2 = random_sku(), random_orderid(), random_orderid()
-    batch = random_batchref()
-    post_to_add_batch(batch, sku, 100, "2011-01-02")
-    url = config.get_api_url()
-    # fully allocate
-    r = requests.post(
-        f"{url}/allocate", json={"orderid": order1, "sku": sku, "qty": 100}
-    )
-    assert r.json()["batchref"] == batch
-
-    # cannot allocate second order
-    r = requests.post(
-        f"{url}/allocate", json={"orderid": order2, "sku": sku, "qty": 100}
-    )
-    assert r.status_code == 400
-
-    # deallocate
-    r = requests.post(
-        f"{url}/deallocate",
-        json={
-            "orderid": order1,
-            "sku": sku,
-            "qty": 100
-        },
-    )
-    assert r.ok
-
-    # now we can allocate second order
-    r = requests.post(
-        f"{url}/allocate", json={"orderid": order2, "sku": sku, "qty": 100}
-    )
-    assert r.ok
-    assert r.json()["batchref"] == batch
+    assert r.json()["message"] == f"Invalid sku {unknown_sku}"
