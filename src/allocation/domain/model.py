@@ -86,3 +86,18 @@ class Batch:
         return self.sku == order_line.sku \
             and self.available_quantity >= order_line.qty \
             and order_line not in self._allocations
+
+
+class Product:
+    def __init__(self, sku, batches):
+        self.sku = sku
+        self.batches: List[Batch] = batches
+
+    def allocate(self, order_line: OrderLine) -> str:
+        try:
+            batch = next(b for b in sorted(self.batches) if b.can_allocate(order_line))
+        except StopIteration as e:
+            raise OutOfStock(f'Артикула {order_line.sku} нет в наличии') from e
+
+        batch.allocate(order_line)
+        return batch.reference
