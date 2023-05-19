@@ -1,5 +1,6 @@
 import abc
 from typing import Set
+
 from allocation.domain import model
 
 
