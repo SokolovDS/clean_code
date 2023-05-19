@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
@@ -5,11 +6,6 @@ from typing import Optional
 
 class Event:
     pass
-
-
-@dataclass
-class OutOfStock(Event):
-    sku: str
 
 
 @dataclass
@@ -21,6 +17,12 @@ class BatchCreated(Event):
 
 
 @dataclass
+class BatchQuantityChanged(Event):
+    ref: str
+    qty: int
+
+
+@dataclass
 class AllocationRequired(Event):
     orderid: str
     sku: str
@@ -28,6 +30,5 @@ class AllocationRequired(Event):
 
 
 @dataclass
-class BatchQuantityChanged(Event):
-    ref: str
-    qty: int
+class OutOfStock(Event):
+    sku: str

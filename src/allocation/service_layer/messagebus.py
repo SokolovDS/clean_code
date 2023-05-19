@@ -1,10 +1,16 @@
-from typing import Dict, Type, List, Callable
-
+from __future__ import annotations
+from typing import List, Dict, Callable, Type, TYPE_CHECKING
 from allocation.domain import events
-from allocation.service_layer import unit_of_work, handlers
+from . import handlers
+
+if TYPE_CHECKING:
+    from . import unit_of_work
 
 
-def handle(event: events.Event, uow: unit_of_work.AbstractUnitOfWork):
+def handle(
+    event: events.Event,
+    uow: unit_of_work.AbstractUnitOfWork,
+):
     results = []
     queue = [event]
     while queue:

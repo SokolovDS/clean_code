@@ -3,12 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Set
-
-from allocation.domain import events
-
-
-class OutOfStock(Exception):
-    pass
+from . import events
 
 
 class Product:
@@ -33,7 +28,9 @@ class Product:
         batch._purchased_quantity = qty
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
-            self.events.append(events.AllocationRequired(line.orderid, line.sku, line.qty))
+            self.events.append(
+                events.AllocationRequired(line.orderid, line.sku, line.qty)
+            )
 
 
 @dataclass(unsafe_hash=True)
@@ -73,9 +70,8 @@ class Batch:
         if self.can_allocate(line):
             self._allocations.add(line)
 
-    def deallocate(self, line: OrderLine):
-        if line in self._allocations:
-            self._allocations.remove(line)
+    def deallocate_one(self) -> OrderLine:
+        return self._allocations.pop()
 
     @property
     def allocated_quantity(self) -> int:
@@ -87,6 +83,3 @@ class Batch:
 
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.available_quantity >= line.qty
-
-    def deallocate_one(self) -> OrderLine:
-        return self._allocations.pop()

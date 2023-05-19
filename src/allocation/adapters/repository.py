@@ -19,7 +19,7 @@ class AbstractRepository(abc.ABC):
             self.seen.add(product)
         return product
 
-    def get_by_batchref(self, batchref: str) -> model.Product:
+    def get_by_batchref(self, batchref) -> model.Product:
         product = self._get_by_batchref(batchref)
         if product:
             self.seen.add(product)
@@ -34,7 +34,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _get_by_batchref(self, sku) -> model.Product:
+    def _get_by_batchref(self, batchref) -> model.Product:
         raise NotImplementedError
 
 
@@ -50,6 +50,9 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(model.Product).filter_by(sku=sku).first()
 
     def _get_by_batchref(self, batchref):
-        return self.session.query(model.Product).join(model.Batch).filter(
-            orm.batches.c.reference == batchref,
-        ).first()
+        return (
+            self.session.query(model.Product)
+            .join(model.Batch)
+            .filter(orm.batches.c.reference == batchref)
+            .first()
+        )
